@@ -1,13 +1,21 @@
 from Tkinter import *
 from PIL import Image,ImageTk
 import sys
+import os
 
-# Root #
+####################
+file_types_accepted = ('.png', '.jpg', '.jpeg')
+####################
+
+#### Root #####
 root = Tk()
 root.title("aVer")
-# root.iconbitmap("")
-# Maximize window
-root.state("zoomed")
+if len(sys.argv) < 1:
+	root.iconbitmap(sys.argv[2])
+# Temporal disable resize
+# root.resizable(False, False)
+w, h = root.winfo_screenwidth(), root.winfo_screenheight() -50
+root.geometry("%dx%d+0+0" % (w, h))
 
 # Select file
 if len(sys.argv) > 1:
@@ -15,7 +23,29 @@ if len(sys.argv) > 1:
 else:
 	print("Please select a file")
 
-# Data #
+# Select current img directory
+url = ""
+img_directory = file
+
+for letter in reversed(file):
+    	if letter == "\\":
+    		break
+    	url += letter
+
+url = url [::-1]
+img_directory = img_directory.replace(url, '')
+
+entries = os.listdir(img_directory)
+
+images_array = []
+
+for i in range(len(entries)):
+	if entries[i].lower().endswith(file_types_accepted):
+		images_array.append(entries[i])
+
+current = images_array.index(url)
+
+##### Data #####
 current_img = Image.open(file) # Fits
 # Get image's original size in pixels
 width, height = current_img.size
@@ -26,16 +56,31 @@ w_width = root.winfo_screenwidth()
 
 final_width = width
 final_height = height
+next = current
 
-
-# Methods #
-
+##### Methods #####
 def prevImage(event):
-    print("prev image")
+	print(event)
+	global next
+	global show_img
+	next = next - 1
+	show_img.place_forget()
+	current_img = Image.open(img_directory + images_array[next])
+	current_resize_img = ImageTk.PhotoImage(current_img)
+	show_img = Label(image=current_resize_img)
+	show_img.place(relx=0.5, rely=0.5, anchor=CENTER)
+	root.mainloop()
 
 def nextImage(event):
-	print("next image")
-
+	global next
+	global show_img
+	next = next + 1
+	show_img.place_forget()
+	current_img = Image.open(img_directory + images_array[next])
+	current_resize_img = ImageTk.PhotoImage(current_img)
+	show_img = Label(image=current_resize_img)
+	show_img.place(relx=0.5, rely=0.5, anchor=CENTER)
+	root.mainloop()
 
 # Get aspect ratio
 if width > height:
@@ -67,8 +112,8 @@ current_resize_img = ImageTk.PhotoImage(resize_img)
 
 # Widgets #
 show_img = Label(image=current_resize_img)
-root.bind("a", prevImage)
-root.bind("s", nextImage)
+root.bind("<Left>", prevImage)
+root.bind("<Right>", nextImage)
 
 # UI #
 show_img.place(relx=0.5, rely=0.5, anchor=CENTER)
