@@ -1,0 +1,1 @@
+START /MIN python "C:\Users\lsaz1\Desktop\Web development\aVer\aVer.py" %*
